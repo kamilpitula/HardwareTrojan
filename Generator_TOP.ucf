@@ -1,0 +1,17 @@
+
+
+NET "switches[0]" LOC = T5;
+NET "switches[1]" LOC = V8;
+NET "switches[2]" LOC = U8;
+NET "switches[3]" LOC = N8;
+NET "switches[4]" LOC = M8;
+NET "switches[5]" LOC = V9;
+NET "switches[6]" LOC = T9;
+NET "switches[7]" LOC = T10;
+NET "buttons[0]" LOC = C4;
+NET "buttons[1]" LOC = A8;
+NET "buttons[2]" LOC = D9;
+NET "buttons[3]" LOC = C9;
+NET "buttons[4]" LOC = B8;
+NET "clk" LOC = V10;
+NET "uart_tx" LOC = N18;
