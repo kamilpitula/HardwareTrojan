@@ -79,7 +79,7 @@ BEGIN
   
  
 
-   -- Stimulus process
+   -- Stimulus processs
    
 
 END;
