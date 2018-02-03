@@ -32,8 +32,8 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity random_bitstream_gen is
 	Generic(numberOfOscillators : integer;
 			negationsMultiplier : integer);
-    Port ( out_bitstream : out  STD_LOGIC;
-    	   in_clk		 : in   STD_LOGIC
+    Port ( out_bitstream : out  STD_LOGIC
+    	   --in_clk		 : in   STD_LOGIC
     );
 end random_bitstream_gen;
 
@@ -66,13 +66,14 @@ outputs_xoring : for i in 2 to numberOfOscillators generate
 	temp(i) <= temp(i - 1) xor outputs(i);
 end generate;
 
-process (in_clk,temp)
-begin
-    if (in_clk = '1') then
-        out_bitstream <= temp(numberOfOscillators);
-    end if;
-end process;
+--process (in_clk,temp)
+--begin
+--    if (in_clk = '1') then
+--        out_bitstream <= temp(numberOfOscillators);
+--    end if;
+--end process;
 
+out_bitstream <= temp(numberOfOscillators);
 
 end Behavioral;
 

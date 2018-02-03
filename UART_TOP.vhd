@@ -30,6 +30,10 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity Generator_TOP is
+	GENERIC(
+			top_numberOfOscillators : integer;
+			top_negationsMultiplier : integer
+		);
     Port ( clk : in  STD_LOGIC;
            data_in : in  STD_LOGIC_VECTOR (7 downto 0);
            led_control : out STD_LOGIC_VECTOR (7 downto 0);
@@ -57,6 +61,13 @@ architecture Behavioral of Generator_TOP is
   signal in_register_enable :STD_LOGIC := '1';
   signal in_seed_vector : std_logic_vector(7 downto 0) := seed_vector;
   signal in_seed_enable : std_logic := '1';
+  signal out_oscillator_driven_LFSR_DATA : STD_LOGIC_VECTOR(7 downto 0);
+
+  --oscillator
+  signal random_bitstream : std_logic;
+
+  --common
+  signal xored_registers_data : STD_LOGIC_VECTOR(7 downto 0);
 
 --components
 
@@ -92,6 +103,14 @@ architecture Behavioral of Generator_TOP is
          in_seed_enable : IN  std_logic;
          out_LFSR_data : OUT  std_logic_vector(7 downto 0)
         );
+    END COMPONENT;
+
+    COMPONENT random_bitstream_gen
+    GENERIC (
+    		numberOfOscillators : integer;
+			negationsMultiplier : integer
+			);
+    PORT (out_bitstream : out  STD_LOGIC);
     END COMPONENT;
 
 --components end
@@ -134,6 +153,23 @@ random_bits_generator: LFSR
             in_seed_enable => in_seed_enable,
             out_LFSR_data => out_LFSR_data
         );
+
+circle_osccilators_driven_lfsr: LFSR
+          GENERIC MAP (register_width => 8)
+          PORT MAP (
+            in_clk => random_bitstream,
+            in_register_enable => in_register_enable,
+            in_seed_vector => in_seed_vector,
+            in_seed_enable => in_seed_enable,
+            out_LFSR_data => out_oscillator_driven_LFSR_DATA
+        );
+
+circle_osccilators: random_bitstream_gen
+		  GENERIC MAP (
+		  	numberOfOscillators => top_numberOfOscillators,
+		  	negationsMultiplier => top_negationsMultiplier
+		  	)
+		  PORT MAP(out_bitstream=>random_bitstream); 
 
 --port mapping end
 
