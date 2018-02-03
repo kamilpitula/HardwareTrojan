@@ -110,7 +110,9 @@ architecture Behavioral of Generator_TOP is
     		numberOfOscillators : integer;
 			negationsMultiplier : integer
 			);
-    PORT (out_bitstream : out  STD_LOGIC);
+    PORT (out_bitstream : out  STD_LOGIC;
+    	  in_clk :in STD_LOGIC
+    	 );
     END COMPONENT;
 
 --components end
@@ -169,7 +171,8 @@ circle_osccilators: random_bitstream_gen
 		  	numberOfOscillators => top_numberOfOscillators,
 		  	negationsMultiplier => top_negationsMultiplier
 		  	)
-		  PORT MAP(out_bitstream=>random_bitstream); 
+		  PORT MAP(out_bitstream=>random_bitstream,
+		  		   in_clk=>tx_Done); 
 
 --port mapping end
 
@@ -178,6 +181,8 @@ begin
  
 	if(clk_2='1') then
 		if (tx_Active = '0') then
+			
+			
 			--data from generator here
 			tx_start <= '1';
 		else
@@ -189,7 +194,10 @@ begin
 
 end process ; 
       
-tx_data <= out_LFSR_data; 
+xored_registers_data <= out_LFSR_data(7 downto 1) & (out_LFSR_data(0) xor out_oscillator_driven_LFSR_DATA(0)) ; --delete this for single prng-lfsr
+--tx_data <= out_LFSR_data; --tested and good working
+tx_data <= xored_registers_data; --untested and random
+--tx_data <= out_oscillator_driven_LFSR_DATA; 
 in_seed_enable <= switches(0);
 
 end Behavioral;
