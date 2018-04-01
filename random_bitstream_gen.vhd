@@ -73,6 +73,7 @@ begin
     end if;
 end process;
 
+--out_bitstream <= temp(numberOfOscillators);
 
 end Behavioral;
 

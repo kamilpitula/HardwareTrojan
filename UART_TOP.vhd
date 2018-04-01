@@ -12,7 +12,7 @@
 --
 -- Dependencies: 
 --
--- Revision: 
+-- Revision: test
 -- Revision 0.01 - File Created
 -- Additional Comments: 
 --
@@ -30,6 +30,10 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity Generator_TOP is
+	GENERIC(
+			top_numberOfOscillators : integer;
+			top_negationsMultiplier : integer
+		);
     Port ( clk : in  STD_LOGIC;
            data_in : in  STD_LOGIC_VECTOR (7 downto 0);
            led_control : out STD_LOGIC_VECTOR (7 downto 0);
@@ -57,6 +61,13 @@ architecture Behavioral of Generator_TOP is
   signal in_register_enable :STD_LOGIC := '1';
   signal in_seed_vector : std_logic_vector(7 downto 0) := seed_vector;
   signal in_seed_enable : std_logic := '1';
+  signal out_oscillator_driven_LFSR_DATA : STD_LOGIC_VECTOR(7 downto 0);
+
+  --oscillator
+  signal random_bitstream : std_logic;
+
+  --common
+  signal xored_registers_data : STD_LOGIC_VECTOR(7 downto 0);
 
 --components
 
@@ -92,6 +103,16 @@ architecture Behavioral of Generator_TOP is
          in_seed_enable : IN  std_logic;
          out_LFSR_data : OUT  std_logic_vector(7 downto 0)
         );
+    END COMPONENT;
+
+    COMPONENT random_bitstream_gen
+    GENERIC (
+    		numberOfOscillators : integer;
+			negationsMultiplier : integer
+			);
+    PORT (out_bitstream : out  STD_LOGIC;
+    	  in_clk :in STD_LOGIC
+    	 );
     END COMPONENT;
 
 --components end
@@ -135,6 +156,24 @@ random_bits_generator: LFSR
             out_LFSR_data => out_LFSR_data
         );
 
+circle_osccilators_driven_lfsr: LFSR
+          GENERIC MAP (register_width => 8)
+          PORT MAP (
+            in_clk => random_bitstream,
+            in_register_enable => in_register_enable,
+            in_seed_vector => in_seed_vector,
+            in_seed_enable => in_seed_enable,
+            out_LFSR_data => out_oscillator_driven_LFSR_DATA
+        );
+
+circle_osccilators: random_bitstream_gen
+		  GENERIC MAP (
+		  	numberOfOscillators => top_numberOfOscillators,
+		  	negationsMultiplier => top_negationsMultiplier
+		  	)
+		  PORT MAP(out_bitstream=>random_bitstream,
+		  		   in_clk=>tx_Done); 
+
 --port mapping end
 
 process( clk,clk_2,tx_Active,tx_data )
@@ -142,6 +181,8 @@ begin
  
 	if(clk_2='1') then
 		if (tx_Active = '0') then
+			
+			
 			--data from generator here
 			tx_start <= '1';
 		else
@@ -153,7 +194,10 @@ begin
 
 end process ; 
       
-tx_data <= out_LFSR_data; 
+xored_registers_data <= out_LFSR_data(7 downto 1) & (out_LFSR_data(0) xor out_oscillator_driven_LFSR_DATA(0)) ; --delete this for single prng-lfsr
+--tx_data <= out_LFSR_data; --tested and good working
+tx_data <= xored_registers_data; --untested and random
+--tx_data <= out_oscillator_driven_LFSR_DATA; 
 in_seed_enable <= switches(0);
 
 end Behavioral;
