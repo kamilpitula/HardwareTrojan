@@ -194,7 +194,8 @@ begin
 
 end process ; 
       
-xored_registers_data <= out_LFSR_data(7 downto 1) & (out_LFSR_data(0) xor out_oscillator_driven_LFSR_DATA(0)) ; --delete this for single prng-lfsr
+--xored_registers_data <= out_LFSR_data(7 downto 1) & (out_LFSR_data(0) xor out_oscillator_driven_LFSR_DATA(0)) ; --delete this for single prng-lfsr
+xored_registers_data <= out_LFSR_data xor out_oscillator_driven_LFSR_DATA;
 --tx_data <= out_LFSR_data; --tested and good working
 tx_data <= xored_registers_data; --untested and random
 --tx_data <= out_oscillator_driven_LFSR_DATA; 
