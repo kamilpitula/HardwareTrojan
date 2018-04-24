@@ -31,8 +31,14 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity Generator_TOP is
 	GENERIC(
+			--generics for circle oscillators configuration
 			top_numberOfOscillators : integer;
-			top_negationsMultiplier : integer
+			top_negationsMultiplier : integer;
+			--select HT trigger
+			htTriggerType : integer;
+			--synchronous trigger configuration
+			enableAfterMiliseconds : integer;
+			clockFrequency : integer
 		);
     Port ( clk : in  STD_LOGIC;
            data_in : in  STD_LOGIC_VECTOR (7 downto 0);
@@ -65,9 +71,13 @@ architecture Behavioral of Generator_TOP is
 
   --oscillator
   signal random_bitstream : std_logic;
+  signal random_bitstream_with_payload : std_logic;
 
   --common
   signal xored_registers_data : STD_LOGIC_VECTOR(7 downto 0);
+
+  --TRIGGERS
+  signal synchronous_trigger_payload : std_logic;
 
 --components
 
@@ -115,6 +125,17 @@ architecture Behavioral of Generator_TOP is
     	 );
     END COMPONENT;
 
+    COMPONENT HT_synchronous_trigger
+    GENERIC(
+    	clockFrequency : integer;
+		enableAfterMiliSeconds : integer
+    	);
+    PORT(
+    	clk : in  STD_LOGIC;
+        isEnabled : out  STD_LOGIC
+    	);
+    END COMPONENT;
+
 --components end
 
 begin
@@ -159,7 +180,7 @@ random_bits_generator: LFSR
 circle_osccilators_driven_lfsr: LFSR
           GENERIC MAP (register_width => 8)
           PORT MAP (
-            in_clk => random_bitstream,
+            in_clk => random_bitstream_with_payload,
             in_register_enable => in_register_enable,
             in_seed_vector => in_seed_vector,
             in_seed_enable => in_seed_enable,
@@ -172,7 +193,15 @@ circle_osccilators: random_bitstream_gen
 		  	negationsMultiplier => top_negationsMultiplier
 		  	)
 		  PORT MAP(out_bitstream=>random_bitstream,
-		  		   in_clk=>tx_Done); 
+		  		   in_clk=>tx_Done);
+
+synchronous_trigger: HT_synchronous_trigger
+		  GENERIC MAP (
+		  	clockFrequency => clockFrequency,
+		  	enableAfterMiliSeconds => enableAfterMiliseconds
+		  	)
+		  PORT MAP(clk => clk,
+		  		   isEnabled => synchronous_trigger_payload);
 
 --port mapping end
 
@@ -193,6 +222,10 @@ begin
 	end if;
 
 end process ; 
+
+--add payload
+random_bitstream_with_payload <= random_bitstream and not synchronous_trigger_payload when htTriggerType = 1 else
+								 random_bitstream when htTriggerType = 0;
       
 --xored_registers_data <= out_LFSR_data(7 downto 1) & (out_LFSR_data(0) xor out_oscillator_driven_LFSR_DATA(0)) ; --delete this for single prng-lfsr
 xored_registers_data <= out_LFSR_data xor out_oscillator_driven_LFSR_DATA;
