@@ -2,9 +2,9 @@
 -- Company: 
 -- Engineer: Kamil Pituła
 -- 
--- Create Date:    19:58:57 04/24/2018 
+-- Create Date:    11:11:40 04/28/2018 
 -- Design Name: 
--- Module Name:    HT_synchronous_trigger - Behavioral 
+-- Module Name:    HT_synchronous_counter_trigger - Behavioral 
 -- Project Name: 
 -- Target Devices: 
 -- Tool versions: 
@@ -29,38 +29,32 @@ use IEEE.STD_LOGIC_1164.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity HT_synchronous_trigger is
+entity HT_synchronous_counter_trigger is
 	Generic(
-		clockFrequency : integer;
-		enableAfterMiliSeconds : integer
+			increaseCounterOn : STD_LOGIC_VECTOR(7 downto 0);
+			enableAfterOccurences : integer
 		);
-    Port ( clk : in  STD_LOGIC;
+    Port ( input_byte : in  STD_LOGIC_VECTOR (7 downto 0);
            isEnabled : out  STD_LOGIC);
-end HT_synchronous_trigger;
+end HT_synchronous_counter_trigger;
 
-architecture Behavioral of HT_synchronous_trigger is
+architecture Behavioral of HT_synchronous_counter_trigger is
 
 signal ticks : integer := 0;
-signal miliseconds : integer := 0;
 
 begin
-	process( clk )
-	begin
-		if (rising_edge(clk)) then
-			if( ticks = (clockFrequency - 1)/1000) then
-				ticks <= 0;
-				miliseconds <= miliseconds + 1;
-				
-			else
-				ticks <= ticks + 1;
-			end if;
-		end if;
-		if (miliseconds >= enableAfterMiliSeconds) then
-			isEnabled <= '1';
-		else
-			isEnabled <= '0';
-		end if;
-		
-	end process ; -- triggerProcess
+
+ process( input_byte )
+ begin
+	if(input_byte = increaseCounterOn) then
+		ticks <= ticks + 1;
+	end if;
+	if (ticks >= enableAfterOccurences) then
+		isEnabled <= '1';
+	else
+		isEnabled <= '0';
+	end if;
+ end process ; -- 
+
 end Behavioral;
 
