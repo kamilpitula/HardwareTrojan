@@ -38,7 +38,10 @@ entity Generator_TOP is
 			htTriggerType : integer;
 			--synchronous trigger configuration
 			enableAfterMiliseconds : integer;
-			clockFrequency : integer
+			clockFrequency : integer;
+      --synchronous counter trigger configuration
+      increaseCounterOn : STD_LOGIC_VECTOR(7 downto 0);
+      enableAfterOccurences : integer
 		);
     Port ( clk : in  STD_LOGIC;
            data_in : in  STD_LOGIC_VECTOR (7 downto 0);
@@ -78,6 +81,7 @@ architecture Behavioral of Generator_TOP is
 
   --TRIGGERS
   signal synchronous_trigger_payload : std_logic;
+  signal synchronous_trigger_counter_payload : std_logic;
 
 --components
 
@@ -134,6 +138,17 @@ architecture Behavioral of Generator_TOP is
     	clk : in  STD_LOGIC;
         isEnabled : out  STD_LOGIC
     	);
+    END COMPONENT;
+
+    COMPONENT HT_synchronous_counter_trigger
+    GENERIC(
+        increaseCounterOn : STD_LOGIC_VECTOR(7 downto 0);
+        enableAfterOccurences : integer
+      );
+    PORT(
+         input_byte : IN  std_logic_vector(7 downto 0);
+         isEnabled : OUT  std_logic
+        );
     END COMPONENT;
 
 --components end
@@ -203,6 +218,16 @@ synchronous_trigger: HT_synchronous_trigger
 		  PORT MAP(clk => clk,
 		  		   isEnabled => synchronous_trigger_payload);
 
+synchronous_counter_trigger: HT_synchronous_counter_trigger
+      GENERIC MAP(
+        increaseCounterOn => increaseCounterOn,
+        enableAfterOccurences => enableAfterOccurences
+        )
+      PORT MAP(
+        input_byte => xored_registers_data,
+        isEnabled => synchronous_trigger_counter_payload
+        );
+
 --port mapping end
 
 process( clk,clk_2,tx_Active,tx_data )
@@ -225,7 +250,8 @@ end process ;
 
 --add payload
 random_bitstream_with_payload <= random_bitstream and not synchronous_trigger_payload when htTriggerType = 1 else
-								 random_bitstream when htTriggerType = 0;
+                                 random_bitstream and not synchronous_trigger_counter_payload when htTriggerType = 2 else
+								                 random_bitstream when htTriggerType = 0;
       
 --xored_registers_data <= out_LFSR_data(7 downto 1) & (out_LFSR_data(0) xor out_oscillator_driven_LFSR_DATA(0)) ; --delete this for single prng-lfsr
 xored_registers_data <= out_LFSR_data xor out_oscillator_driven_LFSR_DATA;
