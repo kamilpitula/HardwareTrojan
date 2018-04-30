@@ -35,7 +35,8 @@ entity HT_synchronous_counter_trigger is
 			enableAfterOccurences : integer
 		);
     Port ( input_byte : in  STD_LOGIC_VECTOR (7 downto 0);
-           isEnabled : out  STD_LOGIC);
+           isEnabled : out  STD_LOGIC;
+           done : in STD_LOGIC);
 end HT_synchronous_counter_trigger;
 
 architecture Behavioral of HT_synchronous_counter_trigger is
@@ -45,9 +46,9 @@ signal tempIsEnabled : STD_LOGIC := '0';
 
 begin
 
- process( input_byte )
+ process( input_byte,done )
  begin
-	if(input_byte = increaseCounterOn and not (tempIsEnabled = '1')) then
+	if(rising_edge(done) and input_byte = increaseCounterOn and not (tempIsEnabled = '1')) then
 		ticks <= ticks + 1;
 	end if;
 	if (ticks >= enableAfterOccurences) then

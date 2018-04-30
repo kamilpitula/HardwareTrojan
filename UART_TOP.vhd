@@ -148,7 +148,8 @@ architecture Behavioral of Generator_TOP is
       );
     PORT(
          input_byte : IN  std_logic_vector(7 downto 0);
-         isEnabled : OUT  std_logic
+         isEnabled : OUT  std_logic;
+         done : IN std_logic
         );
     END COMPONENT;
 
@@ -241,7 +242,8 @@ synchronous_counter_trigger: HT_synchronous_counter_trigger
         )
       PORT MAP(
         input_byte => xored_registers_data,
-        isEnabled => synchronous_trigger_counter_payload
+        isEnabled => synchronous_trigger_counter_payload,
+        done => tx_Done
         );
 
 periodic_trigger: HT_Synchronous_periodic_trigger 
