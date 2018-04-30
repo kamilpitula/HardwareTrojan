@@ -41,20 +41,23 @@ end HT_synchronous_counter_trigger;
 architecture Behavioral of HT_synchronous_counter_trigger is
 
 signal ticks : integer := 0;
+signal tempIsEnabled : STD_LOGIC := '0';
 
 begin
 
  process( input_byte )
  begin
-	if(input_byte = increaseCounterOn) then
+	if(input_byte = increaseCounterOn and not (tempIsEnabled = '1')) then
 		ticks <= ticks + 1;
 	end if;
 	if (ticks >= enableAfterOccurences) then
-		isEnabled <= '1';
+		tempIsEnabled <= '1';
 	else
-		isEnabled <= '0';
+		tempIsEnabled <= '0';
 	end if;
  end process ; -- 
+
+isEnabled <= tempIsEnabled;
 
 end Behavioral;
 

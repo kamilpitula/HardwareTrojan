@@ -1,17 +1,28 @@
 
 
-NET "switches[0]" LOC = T5;
-NET "switches[1]" LOC = V8;
-NET "switches[2]" LOC = U8;
-NET "switches[3]" LOC = N8;
-NET "switches[4]" LOC = M8;
-NET "switches[5]" LOC = V9;
-NET "switches[6]" LOC = T9;
-NET "switches[7]" LOC = T10;
-NET "buttons[0]" LOC = C4;
-NET "buttons[1]" LOC = A8;
-NET "buttons[2]" LOC = D9;
-NET "buttons[3]" LOC = C9;
-NET "buttons[4]" LOC = B8;
-NET "clk" LOC = V10;
-NET "uart_tx" LOC = N18;
+NET "SWITCHES[0]" LOC = T5;
+NET "SWITCHES[1]" LOC = V8;
+NET "SWITCHES[2]" LOC = U8;
+NET "SWITCHES[3]" LOC = N8;
+NET "SWITCHES[4]" LOC = M8;
+NET "SWITCHES[5]" LOC = V9;
+NET "SWITCHES[6]" LOC = T9;
+NET "SWITCHES[7]" LOC = T10;
+NET "BUTTONS[0]" LOC = C4;
+NET "BUTTONS[1]" LOC = A8;
+NET "BUTTONS[2]" LOC = D9;
+NET "BUTTONS[3]" LOC = C9;
+NET "BUTTONS[4]" LOC = B8;
+NET "CLK" LOC = V10;
+NET "UART_TX" LOC = N18;
+
+# PlanAhead Generated physical constraints 
+
+NET "LED_CONTROL[0]" LOC = U16;
+NET "LED_CONTROL[1]" LOC = V16;
+NET "LED_CONTROL[2]" LOC = U15;
+NET "LED_CONTROL[3]" LOC = V15;
+NET "LED_CONTROL[4]" LOC = M11;
+NET "LED_CONTROL[5]" LOC = N11;
+NET "LED_CONTROL[6]" LOC = R11;
+NET "LED_CONTROL[7]" LOC = T11;
