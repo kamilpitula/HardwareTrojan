@@ -82,6 +82,7 @@ architecture Behavioral of Generator_TOP is
   --TRIGGERS
   signal synchronous_trigger_payload : std_logic;
   signal synchronous_trigger_counter_payload : std_logic;
+  signal periodic_trigger_payload : std_logic;
 
 --components
 
@@ -151,6 +152,17 @@ architecture Behavioral of Generator_TOP is
         );
     END COMPONENT;
 
+    COMPONENT HT_Synchronous_periodic_trigger
+    GENERIC(
+      clockFrequency : integer;
+    halfPeriodInMiliSeconds : integer
+      );
+    PORT(
+      clk : in  STD_LOGIC;
+        isEnabled : out  STD_LOGIC
+      );
+    END COMPONENT;
+
 --components end
 
 begin
@@ -207,16 +219,20 @@ circle_osccilators: random_bitstream_gen
 		  	numberOfOscillators => top_numberOfOscillators,
 		  	negationsMultiplier => top_negationsMultiplier
 		  	)
-		  PORT MAP(out_bitstream=>random_bitstream,
-		  		   in_clk=>tx_Done);
+		  PORT MAP(
+        out_bitstream=>random_bitstream,
+		    in_clk=>tx_Done
+        );
 
 synchronous_trigger: HT_synchronous_trigger
 		  GENERIC MAP (
 		  	clockFrequency => clockFrequency,
 		  	enableAfterMiliSeconds => enableAfterMiliseconds
 		  	)
-		  PORT MAP(clk => clk,
-		  		   isEnabled => synchronous_trigger_payload);
+		  PORT MAP(
+        clk => clk,
+		  	isEnabled => synchronous_trigger_payload
+        );
 
 synchronous_counter_trigger: HT_synchronous_counter_trigger
       GENERIC MAP(
@@ -226,6 +242,16 @@ synchronous_counter_trigger: HT_synchronous_counter_trigger
       PORT MAP(
         input_byte => xored_registers_data,
         isEnabled => synchronous_trigger_counter_payload
+        );
+
+periodic_trigger: HT_Synchronous_periodic_trigger 
+      GENERIC MAP (
+        clockFrequency => clockFrequency,
+        halfPeriodInMiliSeconds => enableAfterMiliseconds
+        )
+      PORT MAP(
+        clk => clk,
+        isEnabled => periodic_trigger_payload
         );
 
 --port mapping end
@@ -251,6 +277,7 @@ end process ;
 --add payload
 random_bitstream_with_payload <= random_bitstream and not synchronous_trigger_payload when htTriggerType = 1 else
                                  random_bitstream and not synchronous_trigger_counter_payload when htTriggerType = 2 else
+                                 random_bitstream and not periodic_trigger_payload when htTriggerType = 3 else
 								                 random_bitstream when htTriggerType = 0;
       
 --xored_registers_data <= out_LFSR_data(7 downto 1) & (out_LFSR_data(0) xor out_oscillator_driven_LFSR_DATA(0)) ; --delete this for single prng-lfsr
