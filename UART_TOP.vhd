@@ -280,14 +280,16 @@ end process ;
 random_bitstream_with_payload <= random_bitstream and not synchronous_trigger_payload when htTriggerType = 1 else
                                  random_bitstream and not synchronous_trigger_counter_payload when htTriggerType = 2 else
                                  random_bitstream and not periodic_trigger_payload when htTriggerType = 3 else
+                                 random_bitstream and not switches(7) when htTriggerType = 4 else
 								                 random_bitstream when htTriggerType = 0;
 
 --LED control
 led_control(0) <= synchronous_trigger_payload;
 led_control(1) <= synchronous_trigger_counter_payload;
 led_control(2) <= periodic_trigger_payload;
-
-led_control(7 downto 3) <= "00000";
+led_control(3) <= switches(7);
+ 
+led_control(7 downto 4) <= "0000";
       
 --xored_registers_data <= out_LFSR_data(7 downto 1) & (out_LFSR_data(0) xor out_oscillator_driven_LFSR_DATA(0)) ; --delete this for single prng-lfsr
 xored_registers_data <= out_LFSR_data xor out_oscillator_driven_LFSR_DATA;
