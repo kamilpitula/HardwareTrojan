@@ -59,7 +59,7 @@ begin
 		if (miliseconds >= halfPeriodInMiliseconds) then
 			isEnabledTemp <= not isEnabledTemp;
 			miliseconds <= 0;
-			ticks <= 0;
+					
 		end if;
 		
 	end process ; -- triggerProcess

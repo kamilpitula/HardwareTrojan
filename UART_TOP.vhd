@@ -148,7 +148,8 @@ architecture Behavioral of Generator_TOP is
       );
     PORT(
          input_byte : IN  std_logic_vector(7 downto 0);
-         isEnabled : OUT  std_logic
+         isEnabled : OUT  std_logic;
+         done : IN std_logic
         );
     END COMPONENT;
 
@@ -181,7 +182,7 @@ rs_tran: RS232_Transmitter
                 );
 
 clk_div: clock_divider 
-          GENERIC MAP (divider => 10000)
+          GENERIC MAP (divider => 1)
           PORT MAP (
             clk_in => clk,
             clk_out => clk_2
@@ -241,7 +242,8 @@ synchronous_counter_trigger: HT_synchronous_counter_trigger
         )
       PORT MAP(
         input_byte => xored_registers_data,
-        isEnabled => synchronous_trigger_counter_payload
+        isEnabled => synchronous_trigger_counter_payload,
+        done => tx_Done
         );
 
 periodic_trigger: HT_Synchronous_periodic_trigger 
@@ -279,6 +281,13 @@ random_bitstream_with_payload <= random_bitstream and not synchronous_trigger_pa
                                  random_bitstream and not synchronous_trigger_counter_payload when htTriggerType = 2 else
                                  random_bitstream and not periodic_trigger_payload when htTriggerType = 3 else
 								                 random_bitstream when htTriggerType = 0;
+
+--LED control
+led_control(0) <= synchronous_trigger_payload;
+led_control(1) <= synchronous_trigger_counter_payload;
+led_control(2) <= periodic_trigger_payload;
+
+led_control(7 downto 3) <= "00000";
       
 --xored_registers_data <= out_LFSR_data(7 downto 1) & (out_LFSR_data(0) xor out_oscillator_driven_LFSR_DATA(0)) ; --delete this for single prng-lfsr
 xored_registers_data <= out_LFSR_data xor out_oscillator_driven_LFSR_DATA;
