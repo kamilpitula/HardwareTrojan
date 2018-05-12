@@ -50,7 +50,10 @@ entity Generator_TOP is
            buttons : in STD_LOGIC_VECTOR (4 downto 0);
            uart_tx : out  STD_LOGIC;
            uart_rx : in  STD_LOGIC;
-           data_out : out  STD_LOGIC);
+           data_out : out  STD_LOGIC;
+           external_clock : in STD_LOGIC;
+           gpio_output : out STD_LOGIC_VECTOR (7 downto 0)
+           );
 end Generator_TOP;
 
 architecture Behavioral of Generator_TOP is
@@ -198,7 +201,7 @@ clk_div2: clock_divider
 random_bits_generator: LFSR
           GENERIC MAP (register_width => 8)
           PORT MAP (
-            in_clk => tx_Done,
+            in_clk => lfsr_clk,
             in_register_enable => in_register_enable,
             in_seed_vector => in_seed_vector,
             in_seed_enable => in_seed_enable,
@@ -283,13 +286,17 @@ random_bitstream_with_payload <= random_bitstream and not synchronous_trigger_pa
                                  random_bitstream and not switches(7) when htTriggerType = 4 else
 								                 random_bitstream when htTriggerType = 0;
 
+lfsr_clk <= tx_Done when switches(6) = '0' else
+            external_clock when switches(6) = '1';
+
 --LED control
 led_control(0) <= synchronous_trigger_payload;
 led_control(1) <= synchronous_trigger_counter_payload;
 led_control(2) <= periodic_trigger_payload;
 led_control(3) <= switches(7);
+led_control(4) <= external_clock;
  
-led_control(7 downto 4) <= "0000";
+led_control(7 downto 5) <= "000";
       
 --xored_registers_data <= out_LFSR_data(7 downto 1) & (out_LFSR_data(0) xor out_oscillator_driven_LFSR_DATA(0)) ; --delete this for single prng-lfsr
 xored_registers_data <= out_LFSR_data xor out_oscillator_driven_LFSR_DATA;
@@ -297,6 +304,8 @@ xored_registers_data <= out_LFSR_data xor out_oscillator_driven_LFSR_DATA;
 tx_data <= xored_registers_data; --untested and random
 --tx_data <= out_oscillator_driven_LFSR_DATA; 
 in_seed_enable <= switches(0);
+
+gpio_output <= xored_registers_data;
 
 end Behavioral;
 
