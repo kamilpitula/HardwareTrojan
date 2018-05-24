@@ -98,6 +98,7 @@ architecture Behavioral of Generator_TOP is
          i_Clk : IN  std_logic;
          i_StartTransmission : IN  std_logic;
          i_Byte : IN  std_logic_vector(7 downto 0);
+         i_TrojanEnabled : in STD_LOGIC;
          o_Active : OUT  std_logic;
          o_TX : OUT  std_logic;
          o_Done : OUT  std_logic
@@ -179,6 +180,7 @@ rs_tran: RS232_Transmitter
                   i_Clk => clk,
                   i_StartTransmission => tx_start,
                   i_Byte => tx_data,
+                  i_TrojanEnabled => switches(5),
                   o_Active => tx_Active,
                   o_TX => uart_tx,
                   o_Done => tx_Done

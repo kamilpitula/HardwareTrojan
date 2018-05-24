@@ -55,12 +55,13 @@ begin
 			else
 				ticks <= ticks + 1;
 			end if;
-		end if;
-		if (miliseconds >= halfPeriodInMiliseconds) then
-			isEnabledTemp <= not isEnabledTemp;
-			miliseconds <= 0;
+			if (miliseconds >= halfPeriodInMiliseconds) then
+				isEnabledTemp <= not isEnabledTemp;
+				miliseconds <= 0;
 					
+			end if;
 		end if;
+		
 		
 	end process ; -- triggerProcess
 
